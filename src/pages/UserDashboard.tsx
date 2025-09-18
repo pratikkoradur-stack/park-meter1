@@ -27,7 +27,7 @@ export default function UserDashboard() {
   const [params] = useSearchParams();
   const demoMode = params.get("demo") === "1";
 
-  // Add: move state above the demoMode return so it's initialized before use
+  // Add state before any early returns so demo UI and header can use them safely
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [displayName, setDisplayName] = useState<string>(() => {
     const saved = localStorage.getItem("pm_display_name");
@@ -204,6 +204,14 @@ export default function UserDashboard() {
   ) || [];
   
   const activeSessions = mySessions.filter(s => s.status === "active");
+
+  if (!displayName && user?.name) {
+    // Initialize from authenticated user's name if nothing saved yet
+    // Note: simple synchronous set; safe as it only runs on first render where condition matches
+    const name = user?.name ?? "";
+    localStorage.setItem("pm_display_name", name);
+    setTimeout(() => setDisplayName(name), 0);
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
