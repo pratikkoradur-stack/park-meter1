@@ -227,10 +227,41 @@ export default function StaffDashboard() {
     registeredToday: 0,
   });
 
+  const [extraVehicleInfo, setExtraVehicleInfo] = useState({
+    studentId: "",
+    dormitory: "",
+    roomNumber: "",
+    make: "",
+    year: String(new Date().getFullYear()),
+  });
+
   const handleRegisterVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await registerVehicle(newVehicle);
+      // Compose payload from existing fields + extras
+      const composedModel = [extraVehicleInfo.make, newVehicle.vehicleModel, extraVehicleInfo.year]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+      const composedNotesParts: Array<string> = [];
+      if (newVehicle.notes) composedNotesParts.push(newVehicle.notes.trim());
+      composedNotesParts.push(
+        `Student ID: ${extraVehicleInfo.studentId || "-"}`,
+        `Dormitory: ${extraVehicleInfo.dormitory || "-"}`,
+        `Room: ${extraVehicleInfo.roomNumber || "-"}`
+      );
+      const composedNotes = composedNotesParts.join(" | ");
+
+      await registerVehicle({
+        licensePlate: newVehicle.licensePlate,
+        ownerName: newVehicle.ownerName,
+        ownerEmail: newVehicle.ownerEmail,
+        ownerPhone: newVehicle.ownerPhone,
+        vehicleModel: composedModel || newVehicle.vehicleModel,
+        vehicleColor: newVehicle.vehicleColor,
+        notes: composedNotes,
+      });
       toast.success("Vehicle registered successfully");
 
       // Increment only when a user registers a vehicle
@@ -240,6 +271,7 @@ export default function StaffDashboard() {
         registeredToday: s.registeredToday + 1,
       }));
 
+      // Reset both forms
       setNewVehicle({
         licensePlate: "",
         ownerName: "",
@@ -248,6 +280,13 @@ export default function StaffDashboard() {
         vehicleModel: "",
         vehicleColor: "",
         notes: ""
+      });
+      setExtraVehicleInfo({
+        studentId: "",
+        dormitory: "",
+        roomNumber: "",
+        make: "",
+        year: String(new Date().getFullYear()),
       });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to register vehicle");
@@ -417,6 +456,92 @@ export default function StaffDashboard() {
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleRegisterVehicle} className="space-y-4">
+                      {/* Student Information */}
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-white/80">Student Information</div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Student ID</Label>
+                            <Input
+                              value={extraVehicleInfo.studentId}
+                              onChange={(e) =>
+                                setExtraVehicleInfo({ ...extraVehicleInfo, studentId: e.target.value })
+                              }
+                              className="glass border-white/20"
+                              placeholder="Enter student ID"
+                            />
+                          </div>
+                          <div>
+                            <Label>Dormitory</Label>
+                            <Select
+                              value={extraVehicleInfo.dormitory}
+                              onValueChange={(value) =>
+                                setExtraVehicleInfo({ ...extraVehicleInfo, dormitory: value })
+                              }
+                            >
+                              <SelectTrigger className="glass border-white/20">
+                                <SelectValue placeholder="Select dormitory" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="alpha">Alpha</SelectItem>
+                                <SelectItem value="beta">Beta</SelectItem>
+                                <SelectItem value="gamma">Gamma</SelectItem>
+                                <SelectItem value="delta">Delta</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Room Number</Label>
+                            <Input
+                              value={extraVehicleInfo.roomNumber}
+                              onChange={(e) =>
+                                setExtraVehicleInfo({ ...extraVehicleInfo, roomNumber: e.target.value })
+                              }
+                              className="glass border-white/20"
+                              placeholder="Enter room number"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Vehicle Information (additional) */}
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-white/80">Vehicle Information</div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Make</Label>
+                            <Select
+                              value={extraVehicleInfo.make}
+                              onValueChange={(value) =>
+                                setExtraVehicleInfo({ ...extraVehicleInfo, make: value })
+                              }
+                            >
+                              <SelectTrigger className="glass border-white/20">
+                                <SelectValue placeholder="Select vehicle make" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Toyota">Toyota</SelectItem>
+                                <SelectItem value="Honda">Honda</SelectItem>
+                                <SelectItem value="Hyundai">Hyundai</SelectItem>
+                                <SelectItem value="Ford">Ford</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Year</Label>
+                            <Input
+                              value={extraVehicleInfo.year}
+                              onChange={(e) =>
+                                setExtraVehicleInfo({ ...extraVehicleInfo, year: e.target.value })
+                              }
+                              className="glass border-white/20"
+                              placeholder="e.g., 2025"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label>License Plate</Label>
