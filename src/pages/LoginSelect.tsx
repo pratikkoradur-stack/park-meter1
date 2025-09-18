@@ -90,6 +90,15 @@ export default function LoginSelect() {
                   >
                     Staff Login
                   </Button>
+
+                  {/* Add Staff Demo Login button */}
+                  <Button
+                    onClick={() => navigate("/staff-dashboard?demo=1")}
+                    variant="outline"
+                    className="w-full glass border-white/20 text-white hover:bg-white/10 mt-3"
+                  >
+                    Demo Login
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
