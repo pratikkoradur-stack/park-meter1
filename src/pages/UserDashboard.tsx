@@ -33,6 +33,10 @@ export default function UserDashboard() {
     const saved = localStorage.getItem("pm_display_name");
     return saved ?? "";
   });
+  // Add: date of birth state persisted locally
+  const [dateOfBirth, setDateOfBirth] = useState<string>(() => {
+    return localStorage.getItem("pm_dob") ?? "";
+  });
 
   // Redirect if staff (only when not in demo mode)
   if (!demoMode && user && (user.role === "staff" || user.role === "admin")) {
@@ -64,6 +68,7 @@ export default function UserDashboard() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Add: Edit Profile button for non-demo mode */}
               <Button 
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
@@ -484,6 +489,20 @@ export default function UserDashboard() {
                   This name appears on your dashboard. It's stored on this device.
                 </p>
               </div>
+
+              {/* Add: Date of Birth */}
+              <div>
+                <label className="text-sm text-white/80 block mb-2">Date of Birth</label>
+                <Input
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  className="glass border-white/20"
+                />
+                <p className="text-xs text-white/60 mt-2">
+                  Your DOB is stored locally and used for personalization only.
+                </p>
+              </div>
             </div>
             <DialogFooter>
               <Button
@@ -497,6 +516,7 @@ export default function UserDashboard() {
                 className="bg-blue-500 hover:bg-blue-600"
                 onClick={() => {
                   localStorage.setItem("pm_display_name", displayName || "");
+                  localStorage.setItem("pm_dob", dateOfBirth || "");
                   toast.success("Profile updated");
                   setIsEditOpen(false);
                 }}
