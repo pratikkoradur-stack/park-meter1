@@ -32,7 +32,74 @@ export default function StaffDashboard() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const demoMode = params.get("demo") === "1";
-  
+
+  // ADD: demo-only local state so the register form works in demo without auth
+  const [demoStats, setDemoStats] = useState({
+    vehicles: 0,
+    activeSessions: 0,
+    openViolations: 0,
+    registeredToday: 0,
+  });
+  const [demoVehicle, setDemoVehicle] = useState({
+    licensePlate: "",
+    ownerName: "",
+    ownerEmail: "",
+    ownerPhone: "",
+    vehicleModel: "",
+    vehicleColor: "",
+    notes: "",
+  });
+  const [demoExtraVehicleInfo, setDemoExtraVehicleInfo] = useState({
+    studentId: "",
+    dormitory: "",
+    roomNumber: "",
+    make: "",
+    year: String(new Date().getFullYear()),
+  });
+
+  // ADD: demo submit handler (no backend calls)
+  const handleDemoRegisterVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const composedModel = [demoExtraVehicleInfo.make, demoVehicle.vehicleModel, demoExtraVehicleInfo.year]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
+    const composedNotesParts: Array<string> = [];
+    if (demoVehicle.notes) composedNotesParts.push(demoVehicle.notes.trim());
+    composedNotesParts.push(
+      `Student ID: ${demoExtraVehicleInfo.studentId || "-"}`,
+      `Dormitory: ${demoExtraVehicleInfo.dormitory || "-"}`,
+      `Room: ${demoExtraVehicleInfo.roomNumber || "-"}`
+    );
+    const composedNotes = composedNotesParts.join(" | ");
+
+    // Simulate success
+    toast.success("Vehicle registered (demo)");
+    setDemoStats((s) => ({
+      ...s,
+      vehicles: s.vehicles + 1,
+      registeredToday: s.registeredToday + 1,
+    }));
+    // Reset fields
+    setDemoVehicle({
+      licensePlate: "",
+      ownerName: "",
+      ownerEmail: "",
+      ownerPhone: "",
+      vehicleModel: "",
+      vehicleColor: "",
+      notes: "",
+    });
+    setDemoExtraVehicleInfo({
+      studentId: "",
+      dormitory: "",
+      roomNumber: "",
+      make: "",
+      year: String(new Date().getFullYear()),
+    });
+  };
+
   // Redirect if not staff (only when authenticated and not in demo)
   if (!demoMode && user && user.role !== "staff" && user.role !== "admin") {
     navigate("/user-dashboard");
@@ -93,7 +160,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Total Vehicles</p>
-                    <p className="text-2xl font-bold">0</p>
+                    <p className="text-2xl font-bold">{demoStats.vehicles}</p>
                   </div>
                   <Car className="w-8 h-8 text-blue-400" />
                 </div>
@@ -105,7 +172,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Active Sessions</p>
-                    <p className="text-2xl font-bold">0</p>
+                    <p className="text-2xl font-bold">{demoStats.activeSessions}</p>
                   </div>
                   <Clock className="w-8 h-8 text-green-400" />
                 </div>
@@ -117,7 +184,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Open Violations</p>
-                    <p className="text-2xl font-bold">0</p>
+                    <p className="text-2xl font-bold">{demoStats.openViolations}</p>
                   </div>
                   <AlertTriangle className="w-8 h-8 text-red-400" />
                 </div>
@@ -129,7 +196,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Registered Today</p>
-                    <p className="text-2xl font-bold">0</p>
+                    <p className="text-2xl font-bold">{demoStats.registeredToday}</p>
                   </div>
                   <CheckCircle className="w-8 h-8 text-purple-400" />
                 </div>
@@ -142,23 +209,177 @@ export default function StaffDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
-                  Register Vehicle
+                  Register Vehicle (Demo)
                 </CardTitle>
                 <CardDescription className="text-white/70">
-                  Sign in as staff to register vehicles
+                  Demo submission updates stats locally. No sign-in required.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-white/60 text-sm">
-                  Registration requires staff access. Continue to staff login to use this feature.
-                </div>
-                <Button
-                  variant="outline"
-                  className="glass border-white/20 text-white hover:bg-white/10"
-                  onClick={() => navigate("/auth?type=staff")}
-                >
-                  Sign in as Staff
-                </Button>
+              <CardContent>
+                <form onSubmit={handleDemoRegisterVehicle} className="space-y-4">
+                  {/* Student Information */}
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-white/80">Student Information</div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Student ID</Label>
+                        <Input
+                          value={demoExtraVehicleInfo.studentId}
+                          onChange={(e) =>
+                            setDemoExtraVehicleInfo({ ...demoExtraVehicleInfo, studentId: e.target.value })
+                          }
+                          className="glass border-white/20"
+                          placeholder="Enter student ID"
+                        />
+                      </div>
+                      <div>
+                        <Label>Dormitory</Label>
+                        <Select
+                          value={demoExtraVehicleInfo.dormitory}
+                          onValueChange={(value) =>
+                            setDemoExtraVehicleInfo({ ...demoExtraVehicleInfo, dormitory: value })
+                          }
+                        >
+                          <SelectTrigger className="glass border-white/20">
+                            <SelectValue placeholder="Select dormitory" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="alpha">Alpha</SelectItem>
+                            <SelectItem value="beta">Beta</SelectItem>
+                            <SelectItem value="gamma">Gamma</SelectItem>
+                            <SelectItem value="delta">Delta</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Room Number</Label>
+                        <Input
+                          value={demoExtraVehicleInfo.roomNumber}
+                          onChange={(e) =>
+                            setDemoExtraVehicleInfo({ ...demoExtraVehicleInfo, roomNumber: e.target.value })
+                          }
+                          className="glass border-white/20"
+                          placeholder="Enter room number"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Vehicle Information (additional) */}
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-white/80">Vehicle Information</div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Make</Label>
+                        <Select
+                          value={demoExtraVehicleInfo.make}
+                          onValueChange={(value) =>
+                            setDemoExtraVehicleInfo({ ...demoExtraVehicleInfo, make: value })
+                          }
+                        >
+                          <SelectTrigger className="glass border-white/20">
+                            <SelectValue placeholder="Select vehicle make" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Toyota">Toyota</SelectItem>
+                            <SelectItem value="Honda">Honda</SelectItem>
+                            <SelectItem value="Hyundai">Hyundai</SelectItem>
+                            <SelectItem value="Ford">Ford</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Year</Label>
+                        <Input
+                          value={demoExtraVehicleInfo.year}
+                          onChange={(e) =>
+                            setDemoExtraVehicleInfo({ ...demoExtraVehicleInfo, year: e.target.value })
+                          }
+                          className="glass border-white/20"
+                          placeholder="e.g., 2025"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>License Plate</Label>
+                      <Input
+                        value={demoVehicle.licensePlate}
+                        onChange={(e) => setDemoVehicle({ ...demoVehicle, licensePlate: e.target.value })}
+                        className="glass border-white/20"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Owner Name</Label>
+                      <Input
+                        value={demoVehicle.ownerName}
+                        onChange={(e) => setDemoVehicle({ ...demoVehicle, ownerName: e.target.value })}
+                        className="glass border-white/20"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Email</Label>
+                      <Input
+                        type="email"
+                        value={demoVehicle.ownerEmail}
+                        onChange={(e) => setDemoVehicle({ ...demoVehicle, ownerEmail: e.target.value })}
+                        className="glass border-white/20"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Phone</Label>
+                      <Input
+                        value={demoVehicle.ownerPhone}
+                        onChange={(e) => setDemoVehicle({ ...demoVehicle, ownerPhone: e.target.value })}
+                        className="glass border-white/20"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Vehicle Model</Label>
+                      <Input
+                        value={demoVehicle.vehicleModel}
+                        onChange={(e) => setDemoVehicle({ ...demoVehicle, vehicleModel: e.target.value })}
+                        className="glass border-white/20"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Color</Label>
+                      <Input
+                        value={demoVehicle.vehicleColor}
+                        onChange={(e) => setDemoVehicle({ ...demoVehicle, vehicleColor: e.target.value })}
+                        className="glass border-white/20"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Notes (Optional)</Label>
+                    <Textarea
+                      value={demoVehicle.notes}
+                      onChange={(e) => setDemoVehicle({ ...demoVehicle, notes: e.target.value })}
+                      className="glass border-white/20"
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
+                    Register Vehicle
+                  </Button>
+                </form>
               </CardContent>
             </Card>
 
