@@ -68,13 +68,12 @@ export default function UserDashboard() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Add: Edit Profile button for non-demo mode */}
               <Button 
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
-                onClick={() => setIsEditOpen(true)}
+                onClick={() => navigate("/")}
               >
-                Edit Profile
+                Home
               </Button>
               <Button 
                 onClick={() => signOut()}
