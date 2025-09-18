@@ -53,7 +53,7 @@ export default function Landing() {
           
           {!isLoading && (
             <Button 
-              onClick={() => navigate("/login-select")}
+              onClick={handleGetStarted}
               variant="outline" 
               className="glass border-white/20 text-white hover:bg-white/10"
             >
