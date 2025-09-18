@@ -26,6 +26,7 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function StaffDashboard() {
   const { user, signOut } = useAuth();
@@ -106,6 +107,8 @@ export default function StaffDashboard() {
     return null;
   }
 
+  const [isLayoutOpen, setIsLayoutOpen] = useState(false);
+
   // Render a static demo dashboard when demoMode is enabled (no backend calls)
   if (demoMode) {
     return (
@@ -133,6 +136,13 @@ export default function StaffDashboard() {
               <Button 
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => setIsLayoutOpen(true)}
+              >
+                Parking Layout
+              </Button>
+              <Button 
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
                 onClick={() => navigate("/")}
               >
                 Home
@@ -147,6 +157,17 @@ export default function StaffDashboard() {
             </div>
           </div>
         </motion.header>
+
+        <Dialog open={isLayoutOpen} onOpenChange={setIsLayoutOpen}>
+          <DialogContent className="glass border-white/20">
+            <DialogHeader>
+              <DialogTitle>Parking Layout</DialogTitle>
+            </DialogHeader>
+            <div className="text-white/80">
+              Parking layout preview — coming soon.
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="relative z-10 max-w-7xl mx-auto p-6">
           <motion.div 
@@ -580,6 +601,13 @@ export default function StaffDashboard() {
             </div>
           </div>
           
+          <Button 
+            variant="outline"
+            className="glass border-white/20 text-white hover:bg-white/10"
+            onClick={() => setIsLayoutOpen(true)}
+          >
+            Parking Layout
+          </Button>
           <Button 
             variant="outline"
             className="glass border-white/20 text-white hover:bg-white/10"

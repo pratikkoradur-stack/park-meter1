@@ -37,6 +37,7 @@ export default function UserDashboard() {
   const [dateOfBirth, setDateOfBirth] = useState<string>(() => {
     return localStorage.getItem("pm_dob") ?? "";
   });
+  const [isLayoutOpen, setIsLayoutOpen] = useState(false);
 
   // Redirect if staff (only when not in demo mode)
   if (!demoMode && user && (user.role === "staff" || user.role === "admin")) {
@@ -76,6 +77,13 @@ export default function UserDashboard() {
                 Home
               </Button>
               <Button 
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => setIsLayoutOpen(true)}
+              >
+                Parking Layout
+              </Button>
+              <Button 
                 onClick={async () => { try { await signOut(); } finally { navigate("/login-select"); } }}
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
@@ -86,6 +94,17 @@ export default function UserDashboard() {
             </div>
           </div>
         </motion.header>
+
+        <Dialog open={isLayoutOpen} onOpenChange={setIsLayoutOpen}>
+          <DialogContent className="glass border-white/20">
+            <DialogHeader>
+              <DialogTitle>Parking Layout</DialogTitle>
+            </DialogHeader>
+            <div className="text-white/80">
+              Parking layout preview — coming soon.
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="relative z-10 max-w-7xl mx-auto p-6">
           {/* Profile header card */}
@@ -245,6 +264,20 @@ export default function UserDashboard() {
           </div>
           
           <Button 
+            variant="outline"
+            className="glass border-white/20 text-white hover:bg-white/10"
+            onClick={() => navigate("/")}
+          >
+            Home
+          </Button>
+          <Button 
+            variant="outline"
+            className="glass border-white/20 text-white hover:bg-white/10"
+            onClick={() => setIsLayoutOpen(true)}
+          >
+            Parking Layout
+          </Button>
+          <Button 
             onClick={async () => { try { await signOut(); } finally { navigate("/login-select"); } }}
             variant="outline"
             className="glass border-white/20 text-white hover:bg-white/10"
@@ -254,6 +287,18 @@ export default function UserDashboard() {
           </Button>
         </div>
       </motion.header>
+
+      {/* Parking Layout Dialog for non-demo */}
+      <Dialog open={isLayoutOpen} onOpenChange={setIsLayoutOpen}>
+        <DialogContent className="glass border-white/20">
+          <DialogHeader>
+            <DialogTitle>Parking Layout</DialogTitle>
+          </DialogHeader>
+          <div className="text-white/80">
+            Parking layout preview — coming soon.
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto p-6">
