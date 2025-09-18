@@ -16,12 +16,23 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function UserDashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const demoMode = params.get("demo") === "1";
+
+  // Add: move state above the demoMode return so it's initialized before use
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [displayName, setDisplayName] = useState<string>(() => {
+    const saved = localStorage.getItem("pm_display_name");
+    return saved ?? "";
+  });
 
   // Redirect if staff (only when not in demo mode)
   if (!demoMode && user && (user.role === "staff" || user.role === "admin")) {
@@ -56,16 +67,17 @@ export default function UserDashboard() {
               <Button 
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
-                onClick={() => navigate("/")}
+                onClick={() => setIsEditOpen(true)}
               >
-                Home
+                Edit Profile
               </Button>
               <Button 
+                onClick={() => signOut()}
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
-                onClick={() => navigate("/auth?type=user")}
               >
-                Logout
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </Button>
             </div>
           </div>
@@ -212,7 +224,7 @@ export default function UserDashboard() {
             </div>
             <div>
               <h1 className="text-2xl font-bold">My Parking</h1>
-              <p className="text-white/70">Welcome back, {user?.name || user?.email}</p>
+              <p className="text-white/70">Welcome back, {displayName || user?.name || user?.email}</p>
             </div>
           </div>
           
@@ -441,6 +453,47 @@ export default function UserDashboard() {
             </CardContent>
           </Card>
         </motion.div>
+
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="glass border-white/20">
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-white/80 block mb-2">Display Name</label>
+                <Input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder={(user?.name || user?.email) ?? "Your name"}
+                  className="glass border-white/20"
+                />
+                <p className="text-xs text-white/60 mt-2">
+                  This name appears on your dashboard. It's stored on this device.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => setIsEditOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-blue-500 hover:bg-blue-600"
+                onClick={() => {
+                  localStorage.setItem("pm_display_name", displayName || "");
+                  toast.success("Profile updated");
+                  setIsEditOpen(false);
+                }}
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
