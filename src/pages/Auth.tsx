@@ -159,6 +159,26 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     </div>
                   )}
 
+                  {/* Demo Login for Staff */}
+                  {isStaffLogin && (
+                    <div className="glass border-white/20 rounded-xl p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-sm text-white/80">
+                          Want to preview the staff dashboard?
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="glass border-white/20 text-white hover:bg-white/10"
+                          onClick={() => navigate("/staff-dashboard?demo=1")}
+                        >
+                          Demo Login
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Show Demo Login only for User login */}
                   {!isStaffLogin && (
                     <div className="glass border-white/20 rounded-xl p-3">

@@ -25,15 +25,166 @@ import {
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router";
 
 export default function StaffDashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const demoMode = params.get("demo") === "1";
   
-  // Redirect if not staff
-  if (user && user.role !== "staff" && user.role !== "admin") {
+  // Redirect if not staff (only when authenticated and not in demo)
+  if (!demoMode && user && user.role !== "staff" && user.role !== "admin") {
     navigate("/user-dashboard");
     return null;
+  }
+
+  // Render a static demo dashboard when demoMode is enabled (no backend calls)
+  if (demoMode) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="floating-orb w-96 h-96 bg-gradient-to-r from-blue-400 to-purple-600 top-10 -left-20" />
+        <div className="floating-orb w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-600 bottom-10 -right-20" />
+
+        <motion.header 
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="relative z-10 glass border-b border-white/20 p-6"
+        >
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Staff Dashboard — Demo</h1>
+                <p className="text-white/70">Preview mode • No live data</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => navigate("/")}
+              >
+                Home
+              </Button>
+              <Button 
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => navigate("/auth?type=staff")}
+              >
+                Logout
+              </Button>
+            </div>
+          </div>
+        </motion.header>
+
+        <div className="relative z-10 max-w-7xl mx-auto p-6">
+          <motion.div 
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="grid md:grid-cols-4 gap-6 mb-8"
+          >
+            <Card className="glass border-white/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/70 text-sm">Total Vehicles</p>
+                    <p className="text-2xl font-bold">128</p>
+                  </div>
+                  <Car className="w-8 h-8 text-blue-400" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass border-white/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/70 text-sm">Active Sessions</p>
+                    <p className="text-2xl font-bold">7</p>
+                  </div>
+                  <Clock className="w-8 h-8 text-green-400" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass border-white/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/70 text-sm">Open Violations</p>
+                    <p className="text-2xl font-bold">3</p>
+                  </div>
+                  <AlertTriangle className="w-8 h-8 text-red-400" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass border-white/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/70 text-sm">Registered Today</p>
+                    <p className="text-2xl font-bold">5</p>
+                  </div>
+                  <CheckCircle className="w-8 h-8 text-purple-400" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Register Vehicle
+                </CardTitle>
+                <CardDescription className="text-white/70">
+                  Demo preview — form disabled
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-white/60 text-sm">
+                  In demo mode, registration is disabled. Sign in as staff to use this feature.
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-white/20">
+              <CardHeader>
+                <CardTitle>Active Sessions</CardTitle>
+                <CardDescription className="text-white/70">
+                  Live list disabled in demo
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="glass rounded-lg p-4 border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">KA01AB1234</span>
+                    <Badge>active</Badge>
+                  </div>
+                  <p className="text-sm text-white/70">Location: Zone A, Spot 15</p>
+                  <p className="text-sm text-white/60">Started: 10:24 AM</p>
+                </div>
+                <div className="glass rounded-lg p-4 border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">MH12CD5678</span>
+                    <Badge>active</Badge>
+                  </div>
+                  <p className="text-sm text-white/70">Location: Zone C, Spot 02</p>
+                  <p className="text-sm text-white/60">Started: 10:10 AM</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const vehicles = useQuery(api.vehicles.getVehicles, {});
