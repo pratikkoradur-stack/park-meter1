@@ -93,7 +93,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Total Vehicles</p>
-                    <p className="text-2xl font-bold">128</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
                   <Car className="w-8 h-8 text-blue-400" />
                 </div>
@@ -105,7 +105,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Active Sessions</p>
-                    <p className="text-2xl font-bold">7</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
                   <Clock className="w-8 h-8 text-green-400" />
                 </div>
@@ -117,7 +117,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Open Violations</p>
-                    <p className="text-2xl font-bold">3</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
                   <AlertTriangle className="w-8 h-8 text-red-400" />
                 </div>
@@ -129,7 +129,7 @@ export default function StaffDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm">Registered Today</p>
-                    <p className="text-2xl font-bold">5</p>
+                    <p className="text-2xl font-bold">0</p>
                   </div>
                   <CheckCircle className="w-8 h-8 text-purple-400" />
                 </div>
@@ -145,13 +145,20 @@ export default function StaffDashboard() {
                   Register Vehicle
                 </CardTitle>
                 <CardDescription className="text-white/70">
-                  Demo preview — form disabled
+                  Sign in as staff to register vehicles
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <div className="text-white/60 text-sm">
-                  In demo mode, registration is disabled. Sign in as staff to use this feature.
+                  Registration requires staff access. Continue to staff login to use this feature.
                 </div>
+                <Button
+                  variant="outline"
+                  className="glass border-white/20 text-white hover:bg-white/10"
+                  onClick={() => navigate("/auth?type=staff")}
+                >
+                  Sign in as Staff
+                </Button>
               </CardContent>
             </Card>
 
