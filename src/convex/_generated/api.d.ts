@@ -16,7 +16,11 @@ import type {
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as parking from "../parking.js";
+import type * as testData from "../testData.js";
 import type * as users from "../users.js";
+import type * as vehicles from "../vehicles.js";
+import type * as violations from "../violations.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -30,7 +34,11 @@ declare const fullApi: ApiFromModules<{
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
   http: typeof http;
+  parking: typeof parking;
+  testData: typeof testData;
   users: typeof users;
+  vehicles: typeof vehicles;
+  violations: typeof violations;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

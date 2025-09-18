@@ -13,11 +13,12 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
+import { ArrowRight, Loader2, Mail, UserX, Shield, Users, ArrowLeft, Car } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 
 interface AuthProps {
   redirectAfterAuth?: string;
@@ -26,23 +27,29 @@ interface AuthProps {
 function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const loginType = searchParams.get("type") || "user";
+  
   const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>(loginType === "staff" ? "staff" : "user");
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      const redirect = redirectAfterAuth || "/";
+      const redirect = redirectAfterAuth || (userRole === "staff" ? "/staff-dashboard" : "/user-dashboard");
       navigate(redirect);
     }
-  }, [authLoading, isAuthenticated, navigate, redirectAfterAuth]);
+  }, [authLoading, isAuthenticated, navigate, redirectAfterAuth, userRole]);
+
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+      formData.append("role", userRole);
       await signIn("email-otp", formData);
       setStep({ email: formData.get("email") as string });
       setIsLoading(false);
@@ -63,76 +70,103 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+      formData.append("role", userRole);
       await signIn("email-otp", formData);
 
-      console.log("signed in");
-
-      const redirect = redirectAfterAuth || "/";
+      const redirect = redirectAfterAuth || (userRole === "staff" ? "/staff-dashboard" : "/user-dashboard");
       navigate(redirect);
     } catch (error) {
       console.error("OTP verification error:", error);
-
       setError("The verification code you entered is incorrect.");
       setIsLoading(false);
-
       setOtp("");
     }
   };
 
-  const handleGuestLogin = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      console.log("Attempting anonymous sign in...");
-      await signIn("anonymous");
-      console.log("Anonymous sign in successful");
-      const redirect = redirectAfterAuth || "/";
-      navigate(redirect);
-    } catch (error) {
-      console.error("Guest login error:", error);
-      console.error("Error details:", JSON.stringify(error, null, 2));
-      setError(`Failed to sign in as guest: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setIsLoading(false);
-    }
-  };
+  const isStaffLogin = loginType === "staff";
 
   return (
-    <div className="min-h-screen flex flex-col">
-
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background orbs */}
+      <div className="floating-orb w-96 h-96 bg-gradient-to-r from-blue-400 to-purple-600 top-10 -left-20" />
+      <div className="floating-orb w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-600 top-1/2 -right-20" />
       
+      {/* Navigation */}
+      <div className="relative z-10 p-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/login-select")}
+            className="text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg glass flex items-center justify-center">
+              <Car className="w-5 h-5 text-primary" />
+            </div>
+            <span className="text-xl font-bold">Parkmeter</span>
+          </div>
+        </div>
+      </div>
+
       {/* Auth Content */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex items-center justify-center h-full flex-col">
-        <Card className="min-w-[350px] pb-0 border shadow-md">
+      <div className="relative z-10 flex items-center justify-center min-h-[80vh] px-6">
+        <Card className="w-full max-w-md glass rounded-3xl border-white/20">
           {step === "signIn" ? (
             <>
-              <CardHeader className="text-center">
-              <div className="flex justify-center">
-                    <img
-                      src="./logo.svg"
-                      alt="Lock Icon"
-                      width={64}
-                      height={64}
-                      className="rounded-lg mb-4 mt-4 cursor-pointer"
-                      onClick={() => navigate("/")}
-                    />
-                  </div>
-                <CardTitle className="text-xl">Get Started</CardTitle>
-                <CardDescription>
-                  Enter your email to log in or sign up
+              <CardHeader className="text-center pb-6">
+                <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 ${
+                  isStaffLogin 
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500" 
+                    : "bg-gradient-to-r from-purple-500 to-pink-500"
+                }`}>
+                  {isStaffLogin ? (
+                    <Shield className="w-8 h-8 text-white" />
+                  ) : (
+                    <Users className="w-8 h-8 text-white" />
+                  )}
+                </div>
+                <CardTitle className="text-2xl font-bold">
+                  {isStaffLogin ? "Staff Access" : "User Access"}
+                </CardTitle>
+                <CardDescription className="text-white/70">
+                  {isStaffLogin 
+                    ? "Enter your credentials to access staff dashboard"
+                    : "Enter your email to access your parking account"
+                  }
                 </CardDescription>
               </CardHeader>
+              
               <form onSubmit={handleEmailSubmit}>
-                <CardContent>
+                <CardContent className="space-y-6">
+                  {isStaffLogin && (
+                    <div>
+                      <label className="text-sm font-medium text-white/80 mb-2 block">
+                        Department
+                      </label>
+                      <Select value={userRole} onValueChange={setUserRole}>
+                        <SelectTrigger className="glass border-white/20 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="staff">Security Staff</SelectItem>
+                          <SelectItem value="admin">Administrator</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   
                   <div className="relative flex items-center gap-2">
                     <div className="relative flex-1">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-white/60" />
                       <Input
                         name="email"
                         placeholder="name@example.com"
                         type="email"
-                        className="pl-9"
+                        className="pl-9 glass border-white/20 text-white placeholder:text-white/50"
                         disabled={isLoading}
                         required
                       />
@@ -142,6 +176,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       variant="outline"
                       size="icon"
                       disabled={isLoading}
+                      className="glass border-white/20 text-white hover:bg-white/10"
                     >
                       {isLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -150,44 +185,22 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       )}
                     </Button>
                   </div>
-                  {error && (
-                    <p className="mt-2 text-sm text-red-500">{error}</p>
-                  )}
                   
-                  <div className="mt-4">
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                          Or
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full mt-4"
-                      onClick={handleGuestLogin}
-                      disabled={isLoading}
-                    >
-                      <UserX className="mr-2 h-4 w-4" />
-                      Continue as Guest
-                    </Button>
-                  </div>
+                  {error && (
+                    <p className="text-sm text-red-400">{error}</p>
+                  )}
                 </CardContent>
               </form>
             </>
           ) : (
             <>
-              <CardHeader className="text-center mt-4">
-                <CardTitle>Check your email</CardTitle>
-                <CardDescription>
+              <CardHeader className="text-center">
+                <CardTitle className="text-xl">Check your email</CardTitle>
+                <CardDescription className="text-white/70">
                   We've sent a code to {step.email}
                 </CardDescription>
               </CardHeader>
+              
               <form onSubmit={handleOtpSubmit}>
                 <CardContent className="pb-4">
                   <input type="hidden" name="email" value={step.email} />
@@ -201,7 +214,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       disabled={isLoading}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && otp.length === 6 && !isLoading) {
-                          // Find the closest form and submit it
                           const form = (e.target as HTMLElement).closest("form");
                           if (form) {
                             form.requestSubmit();
@@ -211,31 +223,38 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     >
                       <InputOTPGroup>
                         {Array.from({ length: 6 }).map((_, index) => (
-                          <InputOTPSlot key={index} index={index} />
+                          <InputOTPSlot key={index} index={index} className="glass border-white/20 text-white" />
                         ))}
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
+                  
                   {error && (
-                    <p className="mt-2 text-sm text-red-500 text-center">
+                    <p className="mt-2 text-sm text-red-400 text-center">
                       {error}
                     </p>
                   )}
-                  <p className="text-sm text-muted-foreground text-center mt-4">
+                  
+                  <p className="text-sm text-white/60 text-center mt-4">
                     Didn't receive a code?{" "}
                     <Button
                       variant="link"
-                      className="p-0 h-auto"
+                      className="p-0 h-auto text-white/80 hover:text-white"
                       onClick={() => setStep("signIn")}
                     >
                       Try again
                     </Button>
                   </p>
                 </CardContent>
+                
                 <CardFooter className="flex-col gap-2">
                   <Button
                     type="submit"
-                    className="w-full"
+                    className={`w-full py-6 text-lg rounded-2xl ${
+                      isStaffLogin 
+                        ? "bg-blue-500 hover:bg-blue-600" 
+                        : "bg-purple-500 hover:bg-purple-600"
+                    } text-white`}
                     disabled={isLoading || otp.length !== 6}
                   >
                     {isLoading ? (
@@ -245,17 +264,18 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       </>
                     ) : (
                       <>
-                        Verify code
+                        Verify & Continue
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Button>
+                  
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setStep("signIn")}
                     disabled={isLoading}
-                    className="w-full"
+                    className="w-full text-white/70 hover:text-white hover:bg-white/5"
                   >
                     Use different email
                   </Button>
@@ -263,20 +283,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               </form>
             </>
           )}
-
-          <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted border-t rounded-b-lg">
-            Secured by{" "}
-            <a
-              href="https://vly.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-primary transition-colors"
-            >
-              vly.ai
-            </a>
-          </div>
         </Card>
-        </div>
       </div>
     </div>
   );
