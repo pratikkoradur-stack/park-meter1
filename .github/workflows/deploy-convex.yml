@@ -1,0 +1,28 @@
+name: Deploy Convex Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Convex
+        run: npx convex deploy
+        env:
+          CONVEX_DEPLOYMENT: cautious-chinchilla-723
+          CONVEX_AUTH_TOKEN: ${{ secrets.CONVEX_AUTH_TOKEN }}
