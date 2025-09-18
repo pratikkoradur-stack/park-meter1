@@ -194,8 +194,12 @@ export default function UserDashboard() {
     );
   }
 
-  const userVehicles = useQuery(api.vehicles.getVehicles, {});
-  const userParkingHistory = useQuery(api.parking.getParkingHistory, {});
+  // Add: Only run staff-only queries if the user is staff/admin
+  const isStaff = user?.role === "staff" || user?.role === "admin";
+
+  // Replace previous queries to avoid Unauthorized for regular users
+  const userVehicles = useQuery(api.vehicles.getVehicles, isStaff ? {} : "skip");
+  const userParkingHistory = useQuery(api.parking.getParkingHistory, isStaff ? {} : "skip");
   
   // Filter user's own vehicles and sessions based on email
   const myVehicles = userVehicles?.filter(v => v.ownerEmail === user?.email) || [];
