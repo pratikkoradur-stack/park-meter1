@@ -220,11 +220,26 @@ export default function StaffDashboard() {
     location: ""
   });
 
+  const [stats, setStats] = useState({
+    vehicles: 0,
+    activeSessions: 0,
+    openViolations: 0,
+    registeredToday: 0,
+  });
+
   const handleRegisterVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await registerVehicle(newVehicle);
       toast.success("Vehicle registered successfully");
+
+      // Increment only when a user registers a vehicle
+      setStats((s) => ({
+        ...s,
+        vehicles: s.vehicles + 1,
+        registeredToday: s.registeredToday + 1,
+      }));
+
       setNewVehicle({
         licensePlate: "",
         ownerName: "",
@@ -323,7 +338,7 @@ export default function StaffDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Total Vehicles</p>
-                  <p className="text-2xl font-bold">{vehicles?.length || 0}</p>
+                  <p className="text-2xl font-bold">{stats.vehicles}</p>
                 </div>
                 <Car className="w-8 h-8 text-blue-400" />
               </div>
@@ -335,7 +350,7 @@ export default function StaffDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Active Sessions</p>
-                  <p className="text-2xl font-bold">{activeSessions?.length || 0}</p>
+                  <p className="text-2xl font-bold">{stats.activeSessions}</p>
                 </div>
                 <Clock className="w-8 h-8 text-green-400" />
               </div>
@@ -347,7 +362,7 @@ export default function StaffDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Open Violations</p>
-                  <p className="text-2xl font-bold">{violations?.length || 0}</p>
+                  <p className="text-2xl font-bold">{stats.openViolations}</p>
                 </div>
                 <AlertTriangle className="w-8 h-8 text-red-400" />
               </div>
@@ -359,11 +374,7 @@ export default function StaffDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/70 text-sm">Registered Today</p>
-                  <p className="text-2xl font-bold">
-                    {vehicles?.filter(v => 
-                      new Date(v._creationTime).toDateString() === new Date().toDateString()
-                    ).length || 0}
-                  </p>
+                  <p className="text-2xl font-bold">{stats.registeredToday}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-purple-400" />
               </div>
