@@ -76,7 +76,7 @@ export default function UserDashboard() {
                 Home
               </Button>
               <Button 
-                onClick={() => signOut()}
+                onClick={async () => { try { await signOut(); } finally { navigate("/login-select"); } }}
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
               >
@@ -245,7 +245,7 @@ export default function UserDashboard() {
           </div>
           
           <Button 
-            onClick={() => signOut()}
+            onClick={async () => { try { await signOut(); } finally { navigate("/login-select"); } }}
             variant="outline"
             className="glass border-white/20 text-white hover:bg-white/10"
           >

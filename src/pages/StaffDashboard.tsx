@@ -353,12 +353,11 @@ export default function StaffDashboard() {
           </div>
           
           <Button 
-            onClick={() => signOut()}
             variant="outline"
             className="glass border-white/20 text-white hover:bg-white/10"
+            onClick={() => navigate("/login-select")}
           >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
+            Logout
           </Button>
         </div>
       </motion.header>
