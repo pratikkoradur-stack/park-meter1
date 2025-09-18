@@ -15,15 +15,171 @@ import {
   XCircle
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router";
 
 export default function UserDashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  
-  // Redirect if staff
-  if (user && (user.role === "staff" || user.role === "admin")) {
+  const [params] = useSearchParams();
+  const demoMode = params.get("demo") === "1";
+
+  // Redirect if staff (only when not in demo mode)
+  if (!demoMode && user && (user.role === "staff" || user.role === "admin")) {
     navigate("/staff-dashboard");
     return null;
+  }
+
+  // Render a static demo dashboard when demoMode is enabled (no backend calls)
+  if (demoMode) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="floating-orb w-96 h-96 bg-gradient-to-r from-purple-400 to-pink-600 top-10 -left-20" />
+        <div className="floating-orb w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-600 bottom-10 -right-20" />
+
+        <motion.header 
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="relative z-10 glass border-b border-white/20 p-6"
+        >
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Parkmeter — My Profile</h1>
+                <p className="text-white/70">Member since • Demo Account</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => navigate("/")}
+              >
+                Home
+              </Button>
+              <Button 
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => navigate("/auth?type=user")}
+              >
+                Logout
+              </Button>
+            </div>
+          </div>
+        </motion.header>
+
+        <div className="relative z-10 max-w-7xl mx-auto p-6">
+          {/* Profile header card */}
+          <Card className="glass border-white/20 mb-6">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full glass flex items-center justify-center">
+                  <Users className="w-8 h-8 text-white/80" />
+                </div>
+                <div>
+                  <div className="text-lg font-semibold">Demo User</div>
+                  <div className="inline-flex items-center gap-2 text-white/70 text-sm">
+                    <span className="px-3 py-1 rounded-full bg-white/10">Member since</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-white/60">Current Time (IST)</div>
+                <div className="text-2xl font-bold text-blue-300">
+                  {new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" })}
+                </div>
+                <div className="text-sm text-white/70">
+                  {new Date().toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Top stats */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <Card className="glass border-white/20">
+              <CardContent className="p-6">
+                <div className="text-sm text-white/70 mb-1">My Vehicles</div>
+                <div className="text-3xl font-bold">0</div>
+                <div className="text-sm text-white/60">Registered vehicles</div>
+              </CardContent>
+            </Card>
+            <Card className="glass border-white/20">
+              <CardContent className="p-6">
+                <div className="text-sm text-white/70 mb-1">Recent Sessions</div>
+                <div className="text-3xl font-bold">0</div>
+                <div className="text-sm text-white/60">This month</div>
+              </CardContent>
+            </Card>
+            <Card className="glass border-white/20">
+              <CardContent className="p-6">
+                <div className="text-sm text-white/70 mb-1">Parking Layout</div>
+                <div className="text-2xl font-bold text-blue-400">Available</div>
+                <div className="text-sm text-white/60">View parking spaces</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+            <div className="grid md:grid-cols-4 gap-6">
+              <Card className="glass border-white/20">
+                <CardContent className="p-5 flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <Car className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <div className="font-medium">Register Vehicle</div>
+                    <div className="text-sm text-white/70">Add a new vehicle to your account</div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="glass border-white/20">
+                <CardContent className="p-5">
+                  <div className="font-medium mb-1">Payment History</div>
+                  <div className="text-sm text-white/70">View your payment history and receipts</div>
+                </CardContent>
+              </Card>
+              <Card className="glass border-white/20">
+                <CardContent className="p-5">
+                  <div className="font-medium mb-1">Parking History</div>
+                  <div className="text-sm text-white/70">View your parking session history</div>
+                </CardContent>
+              </Card>
+              <Card className="glass border-white/20">
+                <CardContent className="p-5">
+                  <div className="font-medium mb-1">Notifications</div>
+                  <div className="text-sm text-white/70">Manage your account notifications</div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* My Vehicles placeholder */}
+          <Card className="glass border-white/20">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Car className="w-5 h-5 mr-2" />
+                My Vehicles
+              </CardTitle>
+              <CardDescription className="text-white/70">
+                Your registered vehicles in the system
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-10 text-white/60">
+                <Car className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No vehicles registered yet</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   const userVehicles = useQuery(api.vehicles.getVehicles, {});
