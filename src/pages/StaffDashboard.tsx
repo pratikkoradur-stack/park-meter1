@@ -616,9 +616,13 @@ export default function StaffDashboard() {
     );
   }
 
-  const vehicles = useQuery(api.vehicles.getVehicles, {});
-  const activeSessions = useQuery(api.parking.getActiveSessions, {});
-  const violations = useQuery(api.violations.getViolations, { resolved: false });
+  // ADD: Guard to only run staff queries when user is staff/admin
+  const isStaff = !!user && (user.role === "staff" || user.role === "admin");
+
+  // REPLACE: Unconditional queries with conditional "skip"
+  const vehicles = useQuery(api.vehicles.getVehicles, isStaff ? {} : "skip");
+  const activeSessions = useQuery(api.parking.getActiveSessions, isStaff ? {} : "skip");
+  const violations = useQuery(api.violations.getViolations, isStaff ? { resolved: false } : "skip");
   
   const registerVehicle = useMutation(api.vehicles.registerVehicle);
   const startSession = useMutation(api.parking.startParkingSession);
