@@ -140,6 +140,23 @@ export default function StaffDashboard() {
     }));
   };
 
+  // ADD: demo map slots + selection state (shared for demo and live)
+  const slots = [
+    { id: "A1", status: "available", details: "Near Gate A" },
+    { id: "A2", status: "occupied", details: "Booked by KA01AB1234" },
+    { id: "A3", status: "reserved", details: "Reserved for VIP" },
+    { id: "A4", status: "maintenance", details: "Coned off" },
+    { id: "B1", status: "available", details: "Shaded area" },
+    { id: "B2", status: "occupied", details: "Booked by MH12CD5678" },
+    { id: "B3", status: "available", details: "Close to Exit" },
+    { id: "B4", status: "reserved", details: "Staff reserved" },
+    { id: "C1", status: "occupied", details: "KA09EF2222" },
+    { id: "C2", status: "maintenance", details: "Cleaning" },
+    { id: "C3", status: "available", details: "General parking" },
+    { id: "C4", status: "available", details: "General parking" },
+  ] as const;
+  const [selectedSlot, setSelectedSlot] = useState<(typeof slots)[number] | null>(null);
+
   // Redirect if not staff (only when authenticated and not in demo)
   if (!demoMode && user && user.role !== "staff" && user.role !== "admin") {
     navigate("/user-dashboard");
@@ -208,12 +225,60 @@ export default function StaffDashboard() {
         </motion.header>
 
         <Dialog open={isLayoutOpen} onOpenChange={setIsLayoutOpen}>
-          <DialogContent className="glass border-white/20">
+          <DialogContent className="glass border-white/20 max-w-3xl">
             <DialogHeader>
               <DialogTitle>Parking Layout</DialogTitle>
             </DialogHeader>
-            <div className="text-white/80">
-              Parking layout preview — coming soon.
+            {/* Legend */}
+            <div className="flex flex-wrap gap-4 mb-4 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-sm bg-green-500" /> <span>Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-sm bg-red-500" /> <span>Occupied</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-sm bg-yellow-400" /> <span>Reserved</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-sm bg-gray-400" /> <span>Under maintenance</span>
+              </div>
+            </div>
+            {/* Grid */}
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {slots.map((slot) => {
+                const color =
+                  slot.status === "available"
+                    ? "bg-green-500/90 hover:bg-green-500"
+                    : slot.status === "occupied"
+                    ? "bg-red-500/90 hover:bg-red-500"
+                    : slot.status === "reserved"
+                    ? "bg-yellow-400/90 hover:bg-yellow-400"
+                    : "bg-gray-400/90 hover:bg-gray-400";
+                return (
+                  <button
+                    key={slot.id}
+                    onMouseEnter={() => setSelectedSlot(slot)}
+                    onClick={() => setSelectedSlot(slot)}
+                    className={`transition-colors text-xs sm:text-sm rounded-md px-2 py-3 text-white font-semibold ${color}`}
+                    title={`${slot.id} • ${slot.status}`}
+                  >
+                    {slot.id}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Details */}
+            <div className="mt-4 text-sm">
+              {selectedSlot ? (
+                <div className="glass p-3 rounded-md border border-white/10">
+                  <div className="font-semibold mb-1">Slot {selectedSlot.id}</div>
+                  <div className="text-white/80 capitalize">Status: {selectedSlot.status}</div>
+                  <div className="text-white/70">Details: {selectedSlot.details}</div>
+                </div>
+              ) : (
+                <div className="text-white/70">Hover or click a slot to view details.</div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -1223,6 +1288,66 @@ export default function StaffDashboard() {
           </Tabs>
         </motion.div>
       </div>
+
+      {/* ADD: Parking Layout Dialog (live) */}
+      <Dialog open={isLayoutOpen} onOpenChange={setIsLayoutOpen}>
+        <DialogContent className="glass border-white/20 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Parking Layout</DialogTitle>
+          </DialogHeader>
+          {/* Legend */}
+          <div className="flex flex-wrap gap-4 mb-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-green-500" /> <span>Available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-red-500" /> <span>Occupied</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-yellow-400" /> <span>Reserved</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-gray-400" /> <span>Under maintenance</span>
+            </div>
+          </div>
+          {/* Grid */}
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+            {slots.map((slot) => {
+              const color =
+                slot.status === "available"
+                  ? "bg-green-500/90 hover:bg-green-500"
+                  : slot.status === "occupied"
+                  ? "bg-red-500/90 hover:bg-red-500"
+                  : slot.status === "reserved"
+                  ? "bg-yellow-400/90 hover:bg-yellow-400"
+                  : "bg-gray-400/90 hover:bg-gray-400";
+              return (
+                <button
+                  key={slot.id}
+                  onMouseEnter={() => setSelectedSlot(slot)}
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`transition-colors text-xs sm:text-sm rounded-md px-2 py-3 text-white font-semibold ${color}`}
+                  title={`${slot.id} • ${slot.status}`}
+                >
+                  {slot.id}
+                </button>
+              );
+            })}
+          </div>
+          {/* Details */}
+          <div className="mt-4 text-sm">
+            {selectedSlot ? (
+              <div className="glass p-3 rounded-md border border-white/10">
+                <div className="font-semibold mb-1">Slot {selectedSlot.id}</div>
+                <div className="text-white/80 capitalize">Status: {selectedSlot.status}</div>
+                <div className="text-white/70">Details: {selectedSlot.details}</div>
+              </div>
+            ) : (
+              <div className="text-white/70">Hover or click a slot to view details.</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ADD: Registered Vehicles Dialog (live) */}
       <Dialog open={isRegisteredOpen} onOpenChange={setIsRegisteredOpen}>
