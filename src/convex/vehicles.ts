@@ -96,3 +96,17 @@ export const updateVehicleStatus = mutation({
     });
   },
 });
+
+export const deleteVehicle = mutation({
+  args: {
+    vehicleId: v.id("vehicles"),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || (user.role !== "staff" && user.role !== "admin")) {
+      throw new Error("Unauthorized: Only staff can delete vehicles");
+    }
+
+    await ctx.db.delete(args.vehicleId);
+  },
+});

@@ -559,6 +559,7 @@ export default function StaffDashboard() {
   const startSession = useMutation(api.parking.startParkingSession);
   const endSession = useMutation(api.parking.endParkingSession);
   const reportViolation = useMutation(api.violations.reportViolation);
+  const deleteVehicle = useMutation(api.vehicles.deleteVehicle);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [newVehicle, setNewVehicle] = useState({
@@ -688,6 +689,19 @@ export default function StaffDashboard() {
     }
   };
 
+  const handleDeleteVehicle = async (vehicleId: string) => {
+    try {
+      await deleteVehicle({ vehicleId: vehicleId as any });
+      toast.success("Vehicle deleted");
+      setStats((s) => ({
+        ...s,
+        vehicles: Math.max(0, s.vehicles - 1),
+      }));
+    } catch {
+      toast.error("Failed to delete vehicle");
+    }
+  };
+
   const filteredVehicles = vehicles?.filter(v => 
     v.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
     v.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -722,6 +736,14 @@ export default function StaffDashboard() {
             onClick={() => setIsLayoutOpen(true)}
           >
             Parking Layout
+          </Button>
+          {/* ADD: Registered Vehicles button (live) */}
+          <Button
+            variant="outline"
+            className="glass border-white/20 text-white hover:bg-white/10"
+            onClick={() => setIsRegisteredOpen(true)}
+          >
+            Registered Vehicles
           </Button>
           <Button 
             variant="outline"
@@ -1015,9 +1037,19 @@ export default function StaffDashboard() {
                         <div key={vehicle._id} className="glass rounded-lg p-4 border-white/10">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-semibold">{vehicle.licensePlate}</span>
-                            <Badge variant={vehicle.status === "registered" ? "default" : "destructive"}>
-                              {vehicle.status}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={vehicle.status === "registered" ? "default" : "destructive"}>
+                                {vehicle.status}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="bg-red-500 hover:bg-red-600"
+                                onClick={() => handleDeleteVehicle(vehicle._id as any)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           </div>
                           <p className="text-sm text-white/70">{vehicle.ownerName}</p>
                           <p className="text-sm text-white/60">{vehicle.vehicleModel} - {vehicle.vehicleColor}</p>
@@ -1191,6 +1223,41 @@ export default function StaffDashboard() {
           </Tabs>
         </motion.div>
       </div>
+
+      {/* ADD: Registered Vehicles Dialog (live) */}
+      <Dialog open={isRegisteredOpen} onOpenChange={setIsRegisteredOpen}>
+        <DialogContent className="glass border-white/20 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Registered Vehicles</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+            {!vehicles || vehicles.length === 0 ? (
+              <div className="text-white/70">No vehicles found.</div>
+            ) : (
+              vehicles.map((v) => (
+                <div key={v._id} className="glass rounded-lg p-4 border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-semibold">{v.licensePlate}</div>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="bg-red-500 hover:bg-red-600"
+                      onClick={() => handleDeleteVehicle(v._id as any)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                  <p className="text-sm text-white/80">{v.ownerName}</p>
+                  <p className="text-sm text-white/70">
+                    {v.vehicleModel} - {v.vehicleColor}
+                  </p>
+                  <p className="text-xs text-white/60">{v.ownerEmail} • {v.ownerPhone}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
