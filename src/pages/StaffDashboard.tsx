@@ -34,6 +34,17 @@ export default function StaffDashboard() {
   const [params] = useSearchParams();
   const demoMode = params.get("demo") === "1";
 
+  // ADD: demo-only local state for registered vehicles list
+  const [demoRegisteredVehicles, setDemoRegisteredVehicles] = useState<Array<{
+    licensePlate: string;
+    ownerName: string;
+    ownerEmail: string;
+    ownerPhone: string;
+    vehicleModel: string;
+    vehicleColor: string;
+    notes: string;
+  }>>([]);
+
   // ADD: demo-only local state so the register form works in demo without auth
   const [demoStats, setDemoStats] = useState({
     vehicles: 0,
@@ -57,6 +68,9 @@ export default function StaffDashboard() {
     make: "",
     year: String(new Date().getFullYear()),
   });
+
+  // ADD: dialog state for Registered Vehicles modal (demo)
+  const [isRegisteredOpen, setIsRegisteredOpen] = useState(false);
 
   // ADD: demo submit handler (no backend calls)
   const handleDemoRegisterVehicle = async (e: React.FormEvent) => {
@@ -82,6 +96,21 @@ export default function StaffDashboard() {
       vehicles: s.vehicles + 1,
       registeredToday: s.registeredToday + 1,
     }));
+
+    // ADD: persist into local demo list
+    setDemoRegisteredVehicles((list) => [
+      ...list,
+      {
+        licensePlate: demoVehicle.licensePlate,
+        ownerName: demoVehicle.ownerName,
+        ownerEmail: demoVehicle.ownerEmail,
+        ownerPhone: demoVehicle.ownerPhone,
+        vehicleModel: composedModel || demoVehicle.vehicleModel,
+        vehicleColor: demoVehicle.vehicleColor,
+        notes: composedNotes,
+      },
+    ]);
+
     // Reset fields
     setDemoVehicle({
       licensePlate: "",
@@ -99,6 +128,16 @@ export default function StaffDashboard() {
       make: "",
       year: String(new Date().getFullYear()),
     });
+  };
+
+  // ADD: demo delete handler
+  const handleDemoDeleteVehicle = (plate: string) => {
+    setDemoRegisteredVehicles((list) => list.filter((v) => v.licensePlate !== plate));
+    setDemoStats((s) => ({
+      ...s,
+      vehicles: Math.max(0, s.vehicles - 1),
+      registeredToday: Math.max(0, s.registeredToday - 1),
+    }));
   };
 
   // Redirect if not staff (only when authenticated and not in demo)
@@ -140,6 +179,16 @@ export default function StaffDashboard() {
               >
                 Parking Layout
               </Button>
+
+              {/* ADD: View Registered Vehicles button (demo) */}
+              <Button
+                variant="outline"
+                className="glass border-white/20 text-white hover:bg-white/10"
+                onClick={() => setIsRegisteredOpen(true)}
+              >
+                Registered Vehicles
+              </Button>
+
               <Button 
                 variant="outline"
                 className="glass border-white/20 text-white hover:bg-white/10"
@@ -165,6 +214,41 @@ export default function StaffDashboard() {
             </DialogHeader>
             <div className="text-white/80">
               Parking layout preview — coming soon.
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ADD: Registered Vehicles Dialog (demo) */}
+        <Dialog open={isRegisteredOpen} onOpenChange={setIsRegisteredOpen}>
+          <DialogContent className="glass border-white/20 max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Registered Vehicles (Demo)</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              {demoRegisteredVehicles.length === 0 ? (
+                <div className="text-white/70">No vehicles registered yet.</div>
+              ) : (
+                demoRegisteredVehicles.map((v) => (
+                  <div key={v.licensePlate} className="glass rounded-lg p-4 border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-semibold">{v.licensePlate}</div>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="bg-red-500 hover:bg-red-600"
+                        onClick={() => handleDemoDeleteVehicle(v.licensePlate)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                    <p className="text-sm text-white/80">{v.ownerName}</p>
+                    <p className="text-sm text-white/70">
+                      {v.vehicleModel} - {v.vehicleColor}
+                    </p>
+                    <p className="text-xs text-white/60">{v.ownerEmail} • {v.ownerPhone}</p>
+                  </div>
+                ))
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -401,6 +485,37 @@ export default function StaffDashboard() {
                     Register Vehicle
                   </Button>
                 </form>
+
+                {/* ADD: Inline list preview with delete option */}
+                <div className="mt-6 space-y-3">
+                  <div className="text-sm font-medium text-white/80">Registered Vehicles (Demo)</div>
+                  {demoRegisteredVehicles.length === 0 ? (
+                    <div className="text-white/60 text-sm">No vehicles yet. Add one using the form above.</div>
+                  ) : (
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {demoRegisteredVehicles.map((v) => (
+                        <div key={v.licensePlate} className="glass rounded-lg p-3 border-white/10">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-semibold">{v.licensePlate}</div>
+                              <div className="text-xs text-white/70">
+                                {v.vehicleModel} - {v.vehicleColor}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="bg-red-500 hover:bg-red-600"
+                              onClick={() => handleDemoDeleteVehicle(v.licensePlate)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
