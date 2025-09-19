@@ -4,10 +4,68 @@ import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
 import { Car, CheckCircle, Shield, Users, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export default function Landing() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  // Add: demo parking layout state
+  type SlotStatus = "available" | "occupied" | "reserved" | "maintenance";
+  type Slot = {
+    id: number;
+    label: string;
+    status: SlotStatus;
+    bookedBy?: string;
+    vehicle?: string;
+  };
+
+  const [isLayoutOpen, setIsLayoutOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
+
+  // Small demo dataset: 24 slots (4 rows x 6 cols)
+  const demoSlots: Array<Slot> = [
+    { id: 1, label: "A1", status: "available" },
+    { id: 2, label: "A2", status: "occupied", bookedBy: "John Doe", vehicle: "KA-01-AB-1234" },
+    { id: 3, label: "A3", status: "reserved", bookedBy: "Jane Smith", vehicle: "DL-05-CD-9876" },
+    { id: 4, label: "A4", status: "maintenance" },
+    { id: 5, label: "A5", status: "available" },
+    { id: 6, label: "A6", status: "available" },
+
+    { id: 7, label: "B1", status: "occupied", bookedBy: "Campus Van", vehicle: "SERVICE-01" },
+    { id: 8, label: "B2", status: "available" },
+    { id: 9, label: "B3", status: "reserved", bookedBy: "Security", vehicle: "STAFF-22" },
+    { id: 10, label: "B4", status: "available" },
+    { id: 11, label: "B5", status: "available" },
+    { id: 12, label: "B6", status: "maintenance" },
+
+    { id: 13, label: "C1", status: "available" },
+    { id: 14, label: "C2", status: "occupied", bookedBy: "Guest", vehicle: "MH-12-EF-4567" },
+    { id: 15, label: "C3", status: "available" },
+    { id: 16, label: "C4", status: "reserved", bookedBy: "Hostel Warden", vehicle: "OFFICE-03" },
+    { id: 17, label: "C5", status: "available" },
+    { id: 18, label: "C6", status: "available" },
+
+    { id: 19, label: "D1", status: "available" },
+    { id: 20, label: "D2", status: "available" },
+    { id: 21, label: "D3", status: "occupied", bookedBy: "Parent", vehicle: "TN-09-GH-2222" },
+    { id: 22, label: "D4", status: "maintenance" },
+    { id: 23, label: "D5", status: "reserved", bookedBy: "Principal", vehicle: "ADMIN-01" },
+    { id: 24, label: "D6", status: "available" },
+  ];
+
+  const statusClasses = (s: SlotStatus) => {
+    if (s === "available") return "bg-green-500/30 text-green-200 border-green-400/30";
+    if (s === "occupied") return "bg-red-500/30 text-red-200 border-red-400/30";
+    if (s === "reserved") return "bg-yellow-500/30 text-yellow-100 border-yellow-400/30";
+    return "bg-gray-500/30 text-gray-200 border-gray-400/30";
+  };
+
+  const statusLabel = (s: SlotStatus) =>
+    s === "available" ? "Available" :
+    s === "occupied" ? "Occupied" :
+    s === "reserved" ? "Reserved" : "Under maintenance";
 
   const handleGetStarted = () => {
     if (isAuthenticated && user) {
@@ -52,13 +110,22 @@ export default function Landing() {
           </div>
           
           {!isLoading && (
-            <Button 
-              onClick={handleGetStarted}
-              variant="outline" 
-              className="glass border-white/20 text-white hover:bg-white/10"
-            >
-              {isAuthenticated ? "Dashboard" : "Login"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => setIsLayoutOpen(true)}
+                variant="outline" 
+                className="glass border-white/20 text-white hover:bg-white/10"
+              >
+                Parking Layout
+              </Button>
+              <Button 
+                onClick={handleGetStarted}
+                variant="outline" 
+                className="glass border-white/20 text-white hover:bg-white/10"
+              >
+                {isAuthenticated ? "Dashboard" : "Login"}
+              </Button>
+            </div>
           )}
         </div>
       </motion.nav>
@@ -173,6 +240,78 @@ export default function Landing() {
           ))}
         </div>
       </motion.div>
+
+      <Dialog open={isLayoutOpen} onOpenChange={(open) => { if (!open) setSelectedSlot(null); setIsLayoutOpen(open); }}>
+        <DialogContent className="glass border-white/20 max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Parking Layout (Demo)</DialogTitle>
+          </DialogHeader>
+
+          {/* Legend */}
+          <div className="flex flex-wrap items-center gap-3 text-sm mb-4">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-green-500" />
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-red-500" />
+              <span>Occupied</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-yellow-400" />
+              <span>Reserved</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm bg-gray-400" />
+              <span>Under maintenance</span>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-[1fr_280px] gap-6">
+            {/* Map grid */}
+            <div className="grid grid-cols-6 gap-3">
+              {demoSlots.map((slot) => (
+                <button
+                  key={slot.id}
+                  title={`${slot.label} • ${statusLabel(slot.status)}${slot.bookedBy ? ` • ${slot.bookedBy}` : ""}`}
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`glass border ${statusClasses(slot.status)} rounded-lg p-3 text-center transition hover:scale-[1.02]`}
+                >
+                  <div className="text-sm font-semibold">{slot.label}</div>
+                  <div className="text-xs opacity-80">{statusLabel(slot.status)}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* Details panel */}
+            <div className="glass rounded-xl border border-white/20 p-4">
+              <h3 className="font-semibold mb-2">Slot Details</h3>
+              {selectedSlot ? (
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Slot</span>
+                    <span className="font-medium">{selectedSlot.label}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Status</span>
+                    <span className="font-medium capitalize">{statusLabel(selectedSlot.status)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Booked By</span>
+                    <span className="font-medium">{selectedSlot.bookedBy ?? "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Vehicle</span>
+                    <span className="font-medium">{selectedSlot.vehicle ?? "—"}</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-white/70">Hover to preview, click a slot to see details here.</p>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
