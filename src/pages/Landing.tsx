@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
 import { Car, CheckCircle, Shield, Users, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router";
@@ -8,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useState } from "react";
 
 export default function Landing() {
-  const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Add: demo parking layout state
@@ -68,15 +66,7 @@ export default function Landing() {
     s === "reserved" ? "Reserved" : "Under maintenance";
 
   const handleGetStarted = () => {
-    if (isAuthenticated && user) {
-      if (user.role === "staff" || user.role === "admin") {
-        navigate("/staff-dashboard");
-      } else {
-        navigate("/user-dashboard");
-      }
-    } else {
-      navigate("/login-select");
-    }
+    navigate("/login-select");
   };
 
   return (
@@ -109,24 +99,22 @@ export default function Landing() {
             </div>
           </div>
           
-          {!isLoading && (
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={() => setIsLayoutOpen(true)}
-                variant="outline" 
-                className="glass border-white/20 text-white hover:bg-white/10"
-              >
-                Parking Layout
-              </Button>
-              <Button 
-                onClick={handleGetStarted}
-                variant="outline" 
-                className="glass border-white/20 text-white hover:bg-white/10"
-              >
-                {isAuthenticated ? "Dashboard" : "Login"}
-              </Button>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={() => setIsLayoutOpen(true)}
+              variant="outline" 
+              className="glass border-white/20 text-white hover:bg-white/10"
+            >
+              Parking Layout
+            </Button>
+            <Button 
+              onClick={handleGetStarted}
+              variant="outline" 
+              className="glass border-white/20 text-white hover:bg-white/10"
+            >
+              Login
+            </Button>
+          </div>
         </div>
       </motion.nav>
 
@@ -158,7 +146,6 @@ export default function Landing() {
                 onClick={handleGetStarted}
                 size="lg"
                 className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-6 text-lg rounded-2xl shadow-2xl shadow-blue-500/25 border-0"
-                disabled={isLoading}
               >
                 <Car className="mr-3 w-5 h-5" />
                 Get Started
