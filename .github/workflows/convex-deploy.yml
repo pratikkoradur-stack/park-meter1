@@ -3,7 +3,7 @@ name: Deploy Convex
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+  workflow-dispatch:
 
 jobs:
   deploy:
@@ -22,10 +22,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'  # Remove cache-dependency-path since you don't have lockfile
+
+      - name: Generate package-lock.json
+        run: npm install --package-lock-only  # Generate lock file without installing
 
       - name: Install dependencies
-        run: npm install  # Use npm install instead of npm ci
+        run: npm ci  # Now use npm ci with the generated lock file
 
       - name: Deploy to Convex
         env:
