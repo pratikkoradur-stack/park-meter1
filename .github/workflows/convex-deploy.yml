@@ -3,7 +3,7 @@ name: Deploy Convex
 on:
   push:
     branches: [main]
-  workflow-dispatch:
+  workflow_dispatch:  # ← Fixed: underscore instead of hyphen
 
 jobs:
   deploy:
@@ -23,11 +23,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Generate package-lock.json
-        run: npm install --package-lock-only  # Generate lock file without installing
-
       - name: Install dependencies
-        run: npm ci  # Now use npm ci with the generated lock file
+        run: npm install  # Using npm install instead of npm ci
 
       - name: Deploy to Convex
         env:
