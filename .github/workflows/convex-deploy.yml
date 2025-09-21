@@ -1,38 +1,32 @@
-name: CI
+name: Deploy Convex
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+    concurrency:
+      group: convex-deploy-${{ github.ref }}
+      cancel-in-progress: true
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
+          node-version: 18
+          cache: npm
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: npm install
 
-      - name: Build project
-        run: pnpm build
+      - name: Deploy to Convex
         env:
-          VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL }}
-          CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOY_KEY }}
-
-      - name: Run tests
-        run: pnpm test || echo "No tests found, skipping"
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: npx convex deploy --yes
