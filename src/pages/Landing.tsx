@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Car, CheckCircle, Shield, Users, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 
 export default function Landing() {
@@ -100,13 +99,6 @@ export default function Landing() {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button 
-              onClick={() => setIsLayoutOpen(true)}
-              variant="outline" 
-              className="glass border-white/20 text-white hover:bg-white/10"
-            >
-              Parking Layout
-            </Button>
             <Button 
               onClick={handleGetStarted}
               variant="outline" 
@@ -228,77 +220,7 @@ export default function Landing() {
         </div>
       </motion.div>
 
-      <Dialog open={isLayoutOpen} onOpenChange={(open) => { if (!open) setSelectedSlot(null); setIsLayoutOpen(open); }}>
-        <DialogContent className="glass border-white/20 max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Parking Layout (Demo)</DialogTitle>
-          </DialogHeader>
-
-          {/* Legend */}
-          <div className="flex flex-wrap items-center gap-3 text-sm mb-4">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-green-500" />
-              <span>Available</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-red-500" />
-              <span>Occupied</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-yellow-400" />
-              <span>Reserved</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-gray-400" />
-              <span>Under maintenance</span>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-[1fr_280px] gap-6">
-            {/* Map grid */}
-            <div className="grid grid-cols-6 gap-3">
-              {demoSlots.map((slot) => (
-                <button
-                  key={slot.id}
-                  title={`${slot.label} • ${statusLabel(slot.status)}${slot.bookedBy ? ` • ${slot.bookedBy}` : ""}`}
-                  onClick={() => setSelectedSlot(slot)}
-                  className={`glass border ${statusClasses(slot.status)} rounded-lg p-3 text-center transition hover:scale-[1.02]`}
-                >
-                  <div className="text-sm font-semibold">{slot.label}</div>
-                  <div className="text-xs opacity-80">{statusLabel(slot.status)}</div>
-                </button>
-              ))}
-            </div>
-
-            {/* Details panel */}
-            <div className="glass rounded-xl border border-white/20 p-4">
-              <h3 className="font-semibold mb-2">Slot Details</h3>
-              {selectedSlot ? (
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Slot</span>
-                    <span className="font-medium">{selectedSlot.label}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Status</span>
-                    <span className="font-medium capitalize">{statusLabel(selectedSlot.status)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Booked By</span>
-                    <span className="font-medium">{selectedSlot.bookedBy ?? "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Vehicle</span>
-                    <span className="font-medium">{selectedSlot.vehicle ?? "—"}</span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-white/70">Hover to preview, click a slot to see details here.</p>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      
     </div>
   );
 }
