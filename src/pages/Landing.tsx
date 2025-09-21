@@ -93,7 +93,7 @@ export default function Landing() {
                 <span className="text-sm font-medium text-blue-200">Secure Parking Management</span>
               </div>
               <h1 className="text-2xl font-bold tracking-tight">
-                Park<span className="text-blue-400">meter</span>
+                Park<span className="text-red-500">Meter</span>
               </h1>
             </div>
           </div>
