@@ -3,66 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Car, CheckCircle, Shield, Users, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router";
-import { useState } from "react";
 
 export default function Landing() {
   const navigate = useNavigate();
-
-  // Add: demo parking layout state
-  type SlotStatus = "available" | "occupied" | "reserved" | "maintenance";
-  type Slot = {
-    id: number;
-    label: string;
-    status: SlotStatus;
-    bookedBy?: string;
-    vehicle?: string;
-  };
-
-  const [isLayoutOpen, setIsLayoutOpen] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-
-  // Small demo dataset: 24 slots (4 rows x 6 cols)
-  const demoSlots: Array<Slot> = [
-    { id: 1, label: "A1", status: "available" },
-    { id: 2, label: "A2", status: "occupied", bookedBy: "John Doe", vehicle: "KA-01-AB-1234" },
-    { id: 3, label: "A3", status: "reserved", bookedBy: "Jane Smith", vehicle: "DL-05-CD-9876" },
-    { id: 4, label: "A4", status: "maintenance" },
-    { id: 5, label: "A5", status: "available" },
-    { id: 6, label: "A6", status: "available" },
-
-    { id: 7, label: "B1", status: "occupied", bookedBy: "Campus Van", vehicle: "SERVICE-01" },
-    { id: 8, label: "B2", status: "available" },
-    { id: 9, label: "B3", status: "reserved", bookedBy: "Security", vehicle: "STAFF-22" },
-    { id: 10, label: "B4", status: "available" },
-    { id: 11, label: "B5", status: "available" },
-    { id: 12, label: "B6", status: "maintenance" },
-
-    { id: 13, label: "C1", status: "available" },
-    { id: 14, label: "C2", status: "occupied", bookedBy: "Guest", vehicle: "MH-12-EF-4567" },
-    { id: 15, label: "C3", status: "available" },
-    { id: 16, label: "C4", status: "reserved", bookedBy: "Hostel Warden", vehicle: "OFFICE-03" },
-    { id: 17, label: "C5", status: "available" },
-    { id: 18, label: "C6", status: "available" },
-
-    { id: 19, label: "D1", status: "available" },
-    { id: 20, label: "D2", status: "available" },
-    { id: 21, label: "D3", status: "occupied", bookedBy: "Parent", vehicle: "TN-09-GH-2222" },
-    { id: 22, label: "D4", status: "maintenance" },
-    { id: 23, label: "D5", status: "reserved", bookedBy: "Principal", vehicle: "ADMIN-01" },
-    { id: 24, label: "D6", status: "available" },
-  ];
-
-  const statusClasses = (s: SlotStatus) => {
-    if (s === "available") return "bg-green-500/30 text-green-200 border-green-400/30";
-    if (s === "occupied") return "bg-red-500/30 text-red-200 border-red-400/30";
-    if (s === "reserved") return "bg-yellow-500/30 text-yellow-100 border-yellow-400/30";
-    return "bg-gray-500/30 text-gray-200 border-gray-400/30";
-  };
-
-  const statusLabel = (s: SlotStatus) =>
-    s === "available" ? "Available" :
-    s === "occupied" ? "Occupied" :
-    s === "reserved" ? "Reserved" : "Under maintenance";
 
   const handleGetStarted = () => {
     navigate("/login-select");
